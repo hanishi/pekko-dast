@@ -3,7 +3,7 @@
 
   "identities": {
     "attacker": {
-      "_comment": "Auth option A -- login: the scanner drives this one real login form (deterministic field detection; the only auto-submit it performs). This is the identity the IDOR scanners act AS.",
+      "_comment": "First test account -- the identity the IDOR scanners act AS. The usual setup is two test accounts each with its own login (see `victim`). `login` drives this one real login form: deterministic field detection, the only auto-submit the scanner performs.",
       "login": {
         "loginUrl": "https://app.example/login",
         "username": "attacker@example.com",
@@ -11,11 +11,15 @@
       }
     },
     "victim": {
-      "_comment": "Auth option B -- cookie: a raw Cookie header value copied from your browser devtools after logging in as the victim. Most reliable (no MFA / field-detection issues) and keeps passwords out of the file. For the two-identity IDOR test the victim only needs to be reachable so the scanner can harvest the victim's object ids to try as the attacker.",
-      "cookie": "session=PASTE_VICTIM_SESSION_COOKIE_HERE"
+      "_comment": "Second test account. Two logins is the realistic two-account IDOR setup: log in as both, harvest the victim's object ids, then try to read them as the attacker. Alternative to `login` when you cannot script the form (MFA, captcha, SSO): replace the `login` block with either `cookie` (a raw Cookie header copied from devtools, e.g. \"session=...; csrf=...\") or `headers` (token auth -- see `reader` below).",
+      "login": {
+        "loginUrl": "https://app.example/login",
+        "username": "victim@example.com",
+        "password": "REPLACE_WITH_TEST_PASSWORD"
+      }
     },
     "reader": {
-      "_comment": "Auth option C -- headers: token auth, e.g. a bearer JWT. Same effect as `cookie`. Only used if a case below references it; delete this identity if you do not need it.",
+      "_comment": "Illustrative only -- shows the no-password alternatives. `headers` is token auth (e.g. a bearer JWT); `cookie` (a raw Cookie header string) works the same way. This identity is used by a `case` below; delete it if you only need attacker/victim.",
       "headers": {
         "Authorization": "Bearer PASTE_API_TOKEN_HERE"
       }

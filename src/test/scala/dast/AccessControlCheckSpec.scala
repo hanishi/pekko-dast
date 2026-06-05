@@ -83,11 +83,12 @@ class AccessControlCheckSpec extends AnyWordSpec with Matchers {
         java.nio.file.Files
           .readString(java.nio.file.Paths.get("scripts/idor-spec.example.json")),
       ).toOption.get
-      // All three auth methods are exercised, attacker/victim are present for the
-      // IDOR scanners, and the unauthenticated case parses to identity = None.
+      // The realistic two-account shape (attacker + victim both via login), the
+      // headers alternative, and an unauthenticated case (identity = None).
       idor.identities("attacker").login.map(_.username) shouldBe
         Some("attacker@example.com")
-      idor.identities("victim").cookie.isDefined shouldBe true
+      idor.identities("victim").login.map(_.username) shouldBe
+        Some("victim@example.com")
       idor.identities("reader").headers.contains("Authorization") shouldBe true
       idor.cases.exists(_.identity.isEmpty) shouldBe true
     }
